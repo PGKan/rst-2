@@ -39,6 +39,11 @@
                             <build-jdk>${jre.version}</build-jdk>
                             <Source-Repository>${project.url}</Source-Repository>
                         </manifestEntries>
+                        <manifest>
+                            <packageName>${project.artifactId}</packageName>
+                            <mainClass>org.pgstyle.rst2.main.Main</mainClass>
+                            <addClasspath>false</addClasspath>
+                        </manifest>
                     </archive>
                 </configuration>
                 <executions>
