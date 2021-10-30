@@ -9,6 +9,7 @@ import org.pgstyle.rst2.application.common.RandomStringGenerator;
 import org.pgstyle.rst2.application.common.RstConfig;
 import org.pgstyle.rst2.application.common.RstResources;
 import org.pgstyle.rst2.application.common.RstUtils;
+import org.pgstyle.rst2.application.gui.RstMainFrame;
 
 public final class RandomStringTools implements Callable<Integer> {
 
@@ -16,6 +17,7 @@ public final class RandomStringTools implements Callable<Integer> {
     public static final int FAIL_DOC  = 255;
     public static final int FAIL_ARG  = 1;
     public static final int FAIL_INIT = 2;
+    public static final int FAIL_INTR = 4;
 
     public RandomStringTools(CommandLineArguments cmdlArgs) {
         this.cmdlArgs = cmdlArgs;
@@ -36,8 +38,23 @@ public final class RandomStringTools implements Callable<Integer> {
         if (this.cmdlArgs.gui()) {
             // start GUI mode
             CmdUtils.stdout("Start in GUI mode..." + RstUtils.NEWLINE);
+            RstMainFrame frame = new RstMainFrame(config);
             int code = RandomStringTools.SUCCESS;
-            // TODO GUI mode
+            try {
+                synchronized (this) {
+                    while (this.cmdlArgs.gui()) {
+                        this.wait();
+                    }
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                if (frame.isClosed()) {
+                    code = RandomStringTools.SUCCESS;
+                }
+                else {
+                    code = RandomStringTools.FAIL_INTR;
+                }
+            }
             CmdUtils.stdout("GUI mode exited with code %d%n", code);
             return code;
         }

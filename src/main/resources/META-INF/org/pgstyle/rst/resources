@@ -42,3 +42,12 @@ rst.text.seed = &extern ${rst.text.path}/seed
 # weight menu
 rst.text.weight = &extern ${rst.text.path}/weight
 #---------------------------------------------------------------
+
+#---------------------------------------------------------------
+# binary resources
+#---------------------------------------------------------------
+rst.font.path = ${rst.root}/fonts
+# fonts: Roboto Mono (Bold)
+# license: ${rst.root}/fonts/LICENSE.txt
+rst.font.mono = &binary ${rst.font.path}/mono.ttf
+rst.font.monobold = &binary ${rst.font.path}/mono-bold.ttf
