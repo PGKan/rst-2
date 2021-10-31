@@ -11,8 +11,30 @@ import org.pgstyle.rst2.application.common.RstConfig.RstType;
 import org.pgstyle.rst2.application.common.RstResources;
 import org.pgstyle.rst2.application.common.RstUtils;
 
+/**
+ * The {@code RstConfigurator} is the controller for loading
+ * {@code CommandLineArguments} and create the configuration container instance
+ * of {@code RstConfig}. And the {@code RstConfigurator} also provides
+ * command-line interactive configuration, which can use the command-line
+ * interface interactively to allow user to configure the {@code RstConfig} with
+ * guided operations.
+ *
+ * @since rst-2
+ * @version rst-2.0
+ * @author PGKan
+ */
 public final class RstConfigurator {
 
+    /**
+     * Creates an {@code RstConfigurator} and loads in command-line arguments.
+     *
+     * @param cmdlArgs the command-line arguments container
+     * @throws IllegalArgumentException
+     *         if the loaded command-line arguments container contains invalid
+     *         argument conbinations
+     * @throws NullPointerException
+     *         if the command-line arguments container is {@code null}
+     */
     public RstConfigurator(CommandLineArguments cmdlArgs) {
         Objects.requireNonNull(cmdlArgs, "cmdlArgs == null");
         this.rstConfig = new RstConfig();
@@ -47,12 +69,21 @@ public final class RstConfigurator {
         }
     }
 
+    /** The configuration container carries all configuration. */
     private RstConfig rstConfig;
 
+    /**
+     * Returns the configuration container of this configurator.
+     *
+     * @return the configuration container of this configurator
+     */
     public RstConfig getConfig() {
         return this.rstConfig;
     }
 
+    /**
+     * Interactive controller of the guided configuring mode.
+     */
     private void interactive() {
         boolean commit = false;
         RandomStringTools.head();
@@ -75,6 +106,12 @@ public final class RstConfigurator {
         }
     }
 
+    /**
+     * Controller handles user inputs.
+     *
+     * @param input the input text from command-line
+     * @return the action summary of the controller
+     */
     private String interaction(String input) {
         switch (input) {
         case "algorithm":
@@ -106,6 +143,11 @@ public final class RstConfigurator {
         }
     }
 
+    /**
+     * Controller handles interactive randomiser type selector.
+     *
+     * @return the action summary of the controller
+     */
     private String algorithm() {
         RstType[] type = Arrays.stream(RstType.values()).filter(s -> !RstType.NUMBER.equals(s)).toArray(RstType[]::new);
         while (true) {
@@ -131,6 +173,11 @@ public final class RstConfigurator {
         }
     }
 
+    /**
+     * Controller handles interactive output length selector.
+     *
+     * @return the action summary of the controller
+     */
     private String length() {
         while (true) {
             CmdUtils.stdout("Current length: %d%n", this.rstConfig.length());
@@ -153,11 +200,21 @@ public final class RstConfigurator {
         }
     }
 
+    /**
+     * Resets all configuration stored in the {@code RstConfig} container.
+     *
+     * @return the action summary of the controller
+     */
     private String reset() {
         this.rstConfig.reset();
         return "reset";
     }
 
+    /**
+     * Controller handles interactive alphanumeric randomiser's ratio selector.
+     *
+     * @return the action summary of the controller
+     */
     private String ratio() {
         if (!RstType.ALPHANUMERIC.equals(this.rstConfig.type())) {
              CmdUtils.stderr("%s%nwrong input: ratio%n", RstUtils.messageOf(new IllegalStateException("not alphanumeric")));
@@ -184,11 +241,21 @@ public final class RstConfigurator {
         }
     }
 
+    /**
+     * Toggle the {@code Secure} flag of the {@code RstConfig} container.
+     *
+     * @return the action summary of the controller
+     */
     private String secure() {
         this.rstConfig.secure(!this.rstConfig.secure());
         return String.valueOf(this.rstConfig.secure());
     }
 
+    /**
+     * Controller handles interactive seed input.
+     *
+     * @return the action summary of the controller
+     */
     private String seed() {
         CmdUtils.stdout(RstResources.get("rst.text.seed"));
         String seed = CmdUtils.stdin();
@@ -196,6 +263,16 @@ public final class RstConfigurator {
         return this.rstConfig.seed();
     }
 
+    /**
+     * Controller handles interactive weighted randomiser's weight selector.
+     *
+     * @param index the index of the weight descriptor to be modified
+     * @return the action summary of the controller
+     * @throws IllegalArgumentException
+     *         if a syntax error exists in the weight statement
+     * @throws NumberFormatException
+     *         if wrong index is input
+     */
     private String weight(int index) {
         if (index <= 0 || index > this.rstConfig.weights() + 1) {
             CmdUtils.stderr("wrong number: %d%n", index);
@@ -217,6 +294,13 @@ public final class RstConfigurator {
         return input;
     }
 
+    /**
+     * Controller handles interactive weighted randomiser's weight selector.
+     *
+     * @param input input contains the index of the weight descriptor to be
+     *              modified
+     * @return the action summary of the controller
+     */
     private String weight(String input) {
         try {
             if (!RstType.WEIGHTED.equals(this.rstConfig.type())) {

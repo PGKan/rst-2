@@ -15,13 +15,38 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * The {@code RstUtils} class contains some useful methods for the random string
+ * tools.
+ *
+ * @since rst-2
+ * @version rst-2.0
+ * @author PGKan
+ */
 public final class RstUtils {
 
+    /** The system-dependent line separator. */
     public static final String NEWLINE = System.lineSeparator();
+    /** String constant of backward slash. */
     public static final String BACK_SLASH = "\\";
+    /** The list of escapable RST control characters. */
     public static final String ESCAPABLE = "\\.:;";
+    /** The list of RST control separators. */
     public static final String SEPARATORS = ":;";
 
+    /**
+     * Splits the argument {@code string} along characters in the argument
+     * {@code delimiters}.
+     *
+     * @param string the string to be splitted
+     * @param delimiters the delimiters for splitting the string
+     * @return a array of {@code String} contains each segments of the string
+     * @throws IllegalArgumentException
+     *         if the argument {@code delimiters} contains invalid delimiter
+     * @throws NullPointerException
+     *         if the argument {@code string} or {@code delimiters} is
+     *         {@code null}
+     */
     public static String[] safeSplit(String string, char[] delimiters) {
         Objects.requireNonNull(string, "string == null");
         Objects.requireNonNull(delimiters, "delimiters == null");
@@ -54,15 +79,47 @@ public final class RstUtils {
                new String[0] : splitted.stream().toArray(String[]::new);
     }
 
+    /**
+     * Creates a stream of characters from the string
+     *
+     * @param string the characters source
+     * @return a newly created stream of characters
+     */
     public static Stream<Character> charStream(String string) {
         return string.chars().mapToObj(i -> (char) i);
     }
 
+    /**
+     * Reads resource file content into a string.
+     *
+     * @param path the path of the resource
+     * @return the file content in a string
+     * @throws IOException
+     *         if the resource file is not readable
+     * @throws IllegalArgumentException
+     *         if the resource file do not exist
+     * @throws NullPointerException
+     *         if the argument {@code path} is {@code null}
+     */
     public static String loadResourceAsString(String path) throws IOException {
         Objects.requireNonNull(path, "path == null");
         return new String(RstUtils.read(RstUtils.class.getResourceAsStream(path)), StandardCharsets.UTF_8);
     }
 
+    /**
+     * Merge the arguments {@code array1} and {@code array2} together with
+     * {@code array1}
+     * in the front.
+     *
+     * @param array1
+     *        the first array
+     * @param array2
+     *        the second array
+     * @return a new array with the merged data stored
+     * @throws NullPointerException
+     *         if the argument {@code array1} or {@code array2} is
+     *         {@code null}.
+     */
     public static byte[] merge(byte[] array1, byte[] array2) {
         Objects.requireNonNull(array1, "array1 == null");
         Objects.requireNonNull(array2, "array2 == null");
@@ -72,20 +129,82 @@ public final class RstUtils {
         return array;
     }
 
+    /**
+     * Get a partition of the argument {@code array} with specified start index
+     * and length. Without extending the size of array if the length is greater
+     * than the count of available elements.
+     *
+     * @param array
+     *        the array
+     * @param start
+     *        the starting index
+     * @param length
+     *        the targeted count of element
+     * @return a new array with the specified element stored
+     * @throws IllegalArgumentException
+     *         if the argument {@code array} is {@code null}; or argument
+     *         {@code start} or {@code length} is negative.
+     */
     public static byte[] partition(byte[] array, int start, int length) {
         return RstUtils.partition(array, start, length, false);
     }
 
+    /**
+     * Get a partition of the argument {@code array} with specified start index
+     * and length.
+     *
+     * @param array
+     *        the array
+     * @param start
+     *        the starting index
+     * @param length
+     *        the targeted count of element
+     * @param padding
+     *        the length of return array is strictly defined by the argument
+     *        {@code length} if set to {@code true}
+     * @return a new array with the specified element stored
+     * @throws IllegalArgumentException
+     *         if the argument {@code array} is {@code null}; or argument
+     *         {@code start} or {@code length} is negative.
+     */
     public static byte[] partition(byte[] array, int start, int length, boolean padding) {
         Objects.requireNonNull(array, "argument array must not null");
         return padding ? Arrays.copyOfRange(array, start, start + length)
             : Arrays.copyOfRange(array, start, Math.min(start + length, array.length));
     }
 
+    /**
+     * Heavy buffered {@link InputStream} read, read all available content in
+     * an {@code InputStream} into a byte array. This method is faster and more
+     * robust than {@link InputStream#read(byte[])}. Using the default byte
+     * buffer size of 2 <sup>16</sup>.
+     *
+     * @param inputStream
+     *        the source {@code InputStream}
+     * @return a byte array contains all data available in the
+     *         {@code InputStream}
+     * @throws IOException
+     *         if the input stream is not readable
+     * @throws IllegalArgumentException
+     *         if the argument inputStream is null
+     */
     public static byte[] read(InputStream inputStream) throws IOException {
         return RstUtils.read(inputStream, Short.MAX_VALUE + 1 << 1);
     }
 
+    /**
+     * Read the content of an {@link InputStream} into the buffer array. This
+     * method work the same way as {@link InputStream#read(byte[])} but more
+     * robust with concurrent stream reading.
+     *
+     * @param inputStream
+     *        the source {@code InputStream}
+     * @param buffer
+     *        the destination of read content
+     * @return the count of byte read from the {@code InputStream}
+     * @throws IOException
+     *         if an I/O error occurs during reading the input stream
+     */
     public static int read(InputStream inputStream, byte[] buffer) throws IOException {
         int i = 0;
         inputStream = RstUtils.bufferedWrapper(inputStream);
@@ -96,6 +215,27 @@ public final class RstUtils {
         return i;
     }
 
+    /**
+     * Heavy buffered {@link InputStream} read, read all available content in
+     * an {@code InputStream} into a byte array. This method is faster and more
+     * robust than {@link InputStream#read(byte[])}. The size of byte buffer can
+     * affect the speed, higher the buffer size faster the read speed up to the
+     * size of available content length. The default buffer size is 2
+     * <sup>16</sup>. This is recommended to use a byte buffer size larger than
+     * 1024.
+     *
+     * @param inputStream
+     *        the source {@code InputStream}
+     * @param bufferSize
+     *        the size of byte buffer
+     * @return a byte array contains all data available in the
+     *         {@code InputStream}
+     * @throws IOException
+     *         if the input stream is readable
+     * @throws IllegalArgumentException
+     *         if the argument inputStream is {@code null}; or bufferSize is
+     *         negative or zero.
+     */
     public static byte[] read(InputStream inputStream, int bufferSize) throws IOException {
         byte[] bytes = new byte[0];
         byte[] buffer = new byte[bufferSize];
@@ -107,6 +247,12 @@ public final class RstUtils {
         return bytes;
     }
 
+    /**
+     * Tests the availability of {@code System.in}.
+     *
+     * @return {@code true} if {@code System.in} is available; or
+     *         {@code false} otherwise
+     */
     public static boolean sysin() {
         try {
             ((BufferedInputStream) System.in).available();
@@ -117,6 +263,14 @@ public final class RstUtils {
         return true;
     }
 
+    /**
+     * Wrap the {@code InputStream} in a {@code BufferedInputStream} if needed.
+     *
+     * @param inputStream
+     *        the origin {@code InputStream}
+     * @return a wrapped {@code BufferedInputStream}; or {@code inputStream}
+     *         itself if it has already been a {@code BufferedInputStream}.
+     */
     private static InputStream bufferedWrapper(InputStream inputStream) {
         if (inputStream instanceof BufferedInputStream) {
             return inputStream;
@@ -124,11 +278,33 @@ public final class RstUtils {
         return new BufferedInputStream(inputStream);
     }
 
+    /**
+     * <p>
+     * Creates a simple message of the given throwable object.
+     * </p>
+     * <p>
+     * The implementation of this method is as below:
+     * </p>
+     * <pre><code>throwable.getClass().getSimpleName() + ":" + throwable.getMessage()</code></pre>
+     *
+     * @param throwable the throwable object
+     * @return the simple message of the throwable object
+     * @throws NullPointerException
+     *         if the argument {@code throwable} is {@code null}
+     */
     public static String messageOf(Throwable throwable) {
         Objects.requireNonNull(throwable, "throwable == null");
         return throwable.getClass().getSimpleName() + ": " + throwable.getMessage();
     }
 
+    /**
+     * Creates a stack trace of the given throwable object.
+     *
+     * @param throwable the throwable object
+     * @return the stack trace of the throwable object
+     * @throws NullPointerException
+     *         if the argument {@code throwable} is {@code null}
+     */
     public static String stackTraceOf(Throwable throwable) {
         Objects.requireNonNull(throwable, "throwable == null");
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -137,6 +313,12 @@ public final class RstUtils {
         return new String(baos.toByteArray(), StandardCharsets.UTF_8);
     }
 
+    /**
+     * Dissects the raw weight descriptor.
+     *
+     * @param raw the raw weight descriptor
+     * @return a list of weight entries
+     */
     public static final List<Entry<String, Integer>> dissect(String raw) {
         List<Entry<String, Integer>> list = new ArrayList<>();
         for (String statement : RstUtils.safeSplit(raw, new char[]{ ';' })) {
@@ -160,11 +342,36 @@ public final class RstUtils {
         return list;
     }
 
+    /**
+     * Normalises a weight entry. All continue characters will be compressed,
+     * ranged character sequence will be merged in possible, and unnecessary
+     * escape will be descaped.
+     *
+     * @param weight the weight entry to be normalised
+     * @return the normalised weight entry
+     * @throws IllegalArgumentException
+     *         if a syntax error exists in the weight statement
+     * @throws NullPointerException
+     *         if the weight entry or the weight statement in the entry is
+     *         {@code null}
+     */
     public static final Entry<String, Integer> normalise(Entry<String, Integer> weight) {
         Objects.requireNonNull(weight, "weight == null");
         return new SimpleEntry<>(RstUtils.normalise(weight.getKey()), weight.getValue());
     }
 
+    /**
+     * Normalises a weight statement. All continue characters will be compressed,
+     * ranged character sequence will be merged in possible, and unnecessary
+     * escape will be descaped.
+     *
+     * @param statement the weight statement to be normalised
+     * @return the normalised weight statement
+     * @throws IllegalArgumentException
+     *         if a syntax error exists in the weight statement
+     * @throws NullPointerException
+     *         if the weight statement is {@code null}
+     */
     public static String normalise(String statement) {
         Objects.requireNonNull(statement, "statement == null");
         try {
@@ -175,6 +382,16 @@ public final class RstUtils {
         }
     }
 
+    /**
+     * Normalises a weight statement.
+     *
+     * @param statement the weight statement to be normalised
+     * @return the normalised weight statement
+     * @throws IllegalArgumentException
+     *         if a syntax error exists in the weight statement
+     * @throws StringIndexOutOfBoundsException
+     *         if unexpected EOS occurred
+     */
     private static String normaliseUnbounded(String statement) {
         StringBuilder string = new StringBuilder();
         for (int i = 0; i < statement.length(); i++) {
@@ -204,6 +421,12 @@ public final class RstUtils {
         return RstUtils.compress(RstUtils.expand(string.toString()));
     }
 
+    /**
+     * Compresses the characters sequence with ranged operator where if possible.
+     *
+     * @param characters the characters sequence to be compressed
+     * @return the compressed characters sequence
+     */
     public static String compress(String characters) {
         if (characters.isEmpty()) {
             return characters;
@@ -228,6 +451,15 @@ public final class RstUtils {
         return compressed.toString();
     }
 
+    /**
+     * Creates a ranged characters sequence of the start and end characters.
+     *
+     * @param start the starting character
+     * @param end the ending character
+     * @return the ranged characters sequence
+     * @throws IllegalArgumentException
+     *         if the ending character is larger than the starting character
+     */
     private static String compress(char start, char end) {
         if (end < start) {
             throw new IllegalArgumentException(String.format("invalid ranged sequence: start:'%c', end:'%c'", start, end));
@@ -244,6 +476,16 @@ public final class RstUtils {
         return string.toString();
     }
 
+    /**
+     * Expands a characters sequence into its characters components.
+     *
+     * @param characters the characters sequence to be expanded
+     * @return the expanded characters sequence
+     * @throws IllegalArgumentException
+     *         if the ending character of ranged statement is larger than its
+     *         starting character; or if the characters sequence contains syntax
+     *         error
+     */
     public static String expand(String characters) {
         StringBuilder expanded = new StringBuilder();
         for (int i = 0; i < characters.length(); i++) {
@@ -266,6 +508,16 @@ public final class RstUtils {
         return expanded.toString();
     }
 
+    /**
+     * Creates an expanded characters sequence of {@code start} to {@code end}.
+     *
+     * @param start the start of the ranged sequence
+     * @param end the end of the ranged sequence
+     * @return the expanded characters sequence
+     * @throws IllegalArgumentException
+     *         if the ending character of ranged statement is larger than its
+     *         starting character
+     */
     private static String expand(char start, char end) {
         if (end < start) {
             throw new IllegalArgumentException(String.format("invalid ranged sequence: %c, %c", start, end));
@@ -277,18 +529,50 @@ public final class RstUtils {
         return expanded.toString();
     }
 
+    /**
+     * Escapes any escapable characters in the string.
+     *
+     * @param string the string to be escaped
+     * @return the escaped string
+     */
     public static String escape(String string) {
         return RstUtils.charStream(string).map(RstUtils::escape).collect(Collectors.joining());
     }
 
+    /**
+     * Returns the escaped character of the character {@code c} if it is
+     * escapable.
+     *
+     * @param c the character to be escaped
+     * @return the escaped character of the character {@code c} if it is
+     *         escapable; or the character {@code c} itself if it is not
+     *         escapable
+     */
     private static String escape(char c) {
         return RstUtils.isEscapable(c) ? RstUtils.BACK_SLASH + c : String.valueOf(c);
     }
 
+    /**
+     * Returns {@code true} if the character is escapable.
+     *
+     * @param c the character to be tested
+     * @return {@code true} if the character {@code c} is escapable; or
+     *         {@code false} otherwise
+     */
     private static boolean isEscapable(char c) {
         return RstUtils.ESCAPABLE.contains(String.valueOf(c));
     }
 
+    /**
+     * Throws an {@code IllegalArgumentException} if the character at index is
+     * not a escapable character.
+     *
+     * @param characters the characters sequence
+     * @param index the index of character to be checked
+     * @return the character at index
+     * @throws IllegalArgumentException
+     *         if the character at index is not a escapable character
+     */
     private static char requireEscapable(String characters, int index) {
         char target = characters.charAt(index);
         if (!RstUtils.isEscapable(target)) {
@@ -297,6 +581,16 @@ public final class RstUtils {
         return target;
     }
 
+    /**
+     * Throws an {@code IllegalArgumentException} if the character at index is a
+     * escapable character.
+     *
+     * @param characters the characters sequence
+     * @param index the index of character to be checked
+     * @return the character at index
+     * @throws IllegalArgumentException
+     *         if the character at index is a escapable character
+     */
     private static char requireNonEscapable(String characters, int index) {
         char target = characters.charAt(index);
         if (RstUtils.isEscapable(target)) {
@@ -305,6 +599,16 @@ public final class RstUtils {
         return target;
     }
 
+    /**
+     * Throws an {@code IllegalArgumentException} if the character at index is a
+     * seperator.
+     *
+     * @param characters the characters sequence
+     * @param index the index of character to be checked
+     * @return the character at index
+     * @throws IllegalArgumentException
+     *         if the character at index is a seperator
+     */
     private static char requireNonSeperator(String characters, int index) {
         char target = characters.charAt(index);
         if (RstUtils.SEPARATORS.contains(String.valueOf(target))) {

@@ -11,20 +11,44 @@ import org.pgstyle.rst2.application.common.RstResources;
 import org.pgstyle.rst2.application.common.RstUtils;
 import org.pgstyle.rst2.application.gui.RstMainFrame;
 
+/**
+ * This class is the main logic controller of the {@code RandomStringTools}
+ * application.
+ *
+ * @since rst-2
+ * @version rst-2.0
+ * @author PGKan
+ */
 public final class RandomStringTools implements Callable<Integer> {
 
+    /** Exiting state: 0 Success */
     public static final int SUCCESS   = 0;
+    /** Exiting state: 255 Document Failure */
     public static final int FAIL_DOC  = 255;
+    /** Exiting state: 1 Argument Failure */
     public static final int FAIL_ARG  = 1;
+    /** Exiting state: 2 Initialisation Failure */
     public static final int FAIL_INIT = 2;
+    /** Exiting state: 4 Interrupted */
     public static final int FAIL_INTR = 4;
 
+    /**
+     * Creates an application controller with loaded command-line arguments.
+     *
+     * @param cmdlArgs the loaded command-line arguments
+     */
     public RandomStringTools(CommandLineArguments cmdlArgs) {
         this.cmdlArgs = cmdlArgs;
     }
 
+    /** Command-line argument storage */
     private final CommandLineArguments cmdlArgs;
 
+    /**
+     * Use the application controller.
+     *
+     * @return the exiting state, a non-zero state indicate error has occurred
+     */
     @Override
     public Integer call() {
         // standard command line support -h/-v
@@ -64,6 +88,13 @@ public final class RandomStringTools implements Callable<Integer> {
         }
     }
 
+    /**
+     * CLI mode entrypoint of the {@code RandomStringTools}.
+     *
+     * @param rstConfig the configuration container loaded from command-line
+     *                  arguments
+     * @return the exiting state, a non-zero state indicate error has occurred
+     */
     private static int main(RstConfig rstConfig) {
         if (rstConfig.skip()) {
             return RandomStringTools.SUCCESS;
@@ -79,18 +110,37 @@ public final class RandomStringTools implements Callable<Integer> {
         return RandomStringTools.SUCCESS;
     }
 
+    /**
+     * Prints the header text.
+     */
     public static void head() {
         RandomStringTools.printResourceText("rst.text.head");
     }
 
+    /**
+     * Prints the help text.
+     *
+     * @return the exiting state, a non-zero state indicate error has occurred
+     */
     public static int help() {
         return RandomStringTools.printResourceText("rst.text.help");
     }
 
+    /**
+     * Prints the version info text.
+     *
+     * @return the exiting state, a non-zero state indicate error has occurred
+     */
     public static int version() {
         return RandomStringTools.printResourceText("rst.text.version");
     }
 
+    /**
+     * Prints the text in a resource file.
+     *
+     * @param key the key of the resource
+     * @return the exiting state, a non-zero state indicate error has occurred
+     */
     private static int printResourceText(String key) {
         if (RstResources.exist(key)) {
             CmdUtils.stdout(RstResources.get(key));

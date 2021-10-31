@@ -10,8 +10,32 @@ import org.pgstyle.rst2.random.Base64Randomiser;
 import org.pgstyle.rst2.random.WeightedRandomiser;
 import org.pgstyle.rst2.security.Randomiser;
 
+/**
+ * <p>
+ * The {@code RandomStringGenerator} uses an {@code RstConfig} to create
+ * randomiser for generating random strings.
+ * </p>
+ * <p>
+ * Refactor of the {@code org.pgs.rst.tool.StringGenerator} class.
+ * </p>
+ *
+ * @since rst-1
+ * @version rst-2.0
+ * @author PGKan
+ */
 public final class RandomStringGenerator {
 
+    /**
+     * Creates a {@code RandomStringGenerator} with an {@code RstConfig}
+     * configuration container.
+     *
+     * @param rstConfig the configuration container
+     * @throws ApplicationException
+     *         if the configuration container contains configuration that leads
+     *         to failure when creating the randomiser
+     * @throws NullPointerException
+     *          if the argument {@code rstConfig} is {@code null}
+     */
     public RandomStringGenerator(RstConfig rstConfig) {
         Objects.requireNonNull(rstConfig, "rstConfig");
         this.rstConfig = rstConfig;
@@ -22,13 +46,26 @@ public final class RandomStringGenerator {
         }
     }
 
+    /** Randomiser configured to generate the required random string. */
     private Randomiser randomiser;
+    /** Configuration container. */
     private RstConfig  rstConfig;
 
+    /**
+     * Generates a random string with the configured randomiser.
+     *
+     * @return a randomly generated string that matches the required
+     *         specification
+     */
     public String generate() {
         return new String(this.randomiser.generate(this.rstConfig.length()), StandardCharsets.UTF_8);
     }
 
+    /**
+     * Creates a randomiser with the stored {@code RstConfig} container.
+     *
+     * @return an instance of {@code Randomiser}
+     */
     private Randomiser makeRandomiser() {
         switch (this.rstConfig.type()) {
             case ALPHANUMERIC:
@@ -45,6 +82,12 @@ public final class RandomStringGenerator {
         }
     }
 
+    /**
+     * Creates an alphanumeric randomiser with the stored {@code RstConfig}
+     * container.
+     *
+     * @return an instance of {@code AlphaNumericRandomiser}
+     */
     private AlphanumericRandomiser makeAlphanumeric() {
         String seed = this.rstConfig.seed();
         if (this.rstConfig.secure()) {
@@ -57,6 +100,11 @@ public final class RandomStringGenerator {
         }
     }
 
+    /**
+     * Creates a base64 randomiser with the stored {@code RstConfig} container.
+     *
+     * @return an instance of {@code Base64Randomiser}
+     */
     private Base64Randomiser makeBase64() {
         String seed = this.rstConfig.seed();
         if (this.rstConfig.secure()) {
@@ -69,6 +117,11 @@ public final class RandomStringGenerator {
         }
     }
 
+    /**
+     * Creates a weighted randomiser with the stored {@code RstConfig} container.
+     *
+     * @return an instance of {@code WeightedRandomiser}
+     */
     private WeightedRandomiser makeWeighted() {
         String seed = this.rstConfig.seed();
         Map<String, Integer> weight = this.rstConfig.compile();

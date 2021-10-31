@@ -30,10 +30,26 @@ import javax.swing.event.DocumentListener;
 
 import org.pgstyle.rst2.application.common.RstUtils;
 
+/**
+ * Frame controller for the config function of weight descriptors of the
+ * {@link org.pgstyle.rst2.random.WeightedRandomiser WeightedRandomiser}.
+ *
+ * @since rst-2
+ * @version rst-2.0
+ * @author PGKan
+ */
 public class RstWeightsFrame {
 
+    /**
+     * Weight descriptor container and controller. It is a subelement of a
+     * {@code RstWeightsFrame}. It contains an action button for adding and
+     * removing cells and the input area for the weight and statement.
+     */
     private class RstWeightCell extends JPanel {
 
+        /**
+         * Event handler of the action button of a {@code RstWeightCell}.
+         */
         private class CellOperation implements ActionListener {
 
             @Override
@@ -57,12 +73,19 @@ public class RstWeightsFrame {
                 this.redraw();
             }
 
+            /**
+             * Triggers redraw of the descriptors component of the weights
+             * configuration dialog.
+             */
             private void redraw() {
                 RstWeightsFrame.this.descriptors.revalidate();
                 RstWeightsFrame.this.descriptors.repaint();
             }
         }
 
+        /**
+         * Event handler of the weight text input of a {@code RstWeightCell}.
+         */
         private class CellValidation implements DocumentListener {
 
             @Override
@@ -93,6 +116,11 @@ public class RstWeightsFrame {
             }
         }
 
+        /**
+         * Initialises a weight descriptor container unit.
+         *
+         * @param realise directly realises this cell when {@code true}
+         */
         public RstWeightCell(boolean realise) {
             // lock realising state
             this.realised = false;
@@ -132,18 +160,40 @@ public class RstWeightsFrame {
 
         private boolean realised;
 
+        /**
+         * Returns {@code true} if this cell has finished realising.
+         *
+         * @return {@code true} if this cell has finished realising; or
+         *         {@code false} otherwise
+         */
         public boolean isRealised() {
             return this.realised;
         }
 
+        /**
+         * Returns the weight value of this cell.
+         *
+         * @return the weight value of this cell
+         */
         public int getWeight() {
             return (int) this.weight.getValue();
         }
 
+        /**
+         * Returns the statement of this cell.
+         *
+         * @return the statement of this cell
+         */
         public String getStatement() {
             return this.statement.getText();
         }
 
+        /**
+         * Realises this cell with the given values.
+         *
+         * @param weight the weight of the descriptor
+         * @param statement the statement of the descriptor
+         */
         public void realise(int weight, String statement) {
             this.action.setText(RstWeightsFrame.REMOVE);
             this.setCell(weight, statement);
@@ -152,6 +202,14 @@ public class RstWeightsFrame {
             this.realise(new SimpleEntry<>(statement, weight));
         }
 
+        /**
+         * Returns the string representation of this cell. Will return the
+         * normalised form if possible.
+         *
+         * @return the normalised descriptor text of this cell; or the raw
+         *         descriptor text if the descriptor statement contains syntax
+         *         error
+         */
         @Override
         public String toString() {
             try {
@@ -163,15 +221,29 @@ public class RstWeightsFrame {
             }
         }
 
+        /**
+         * Set the weight and statement of this cell
+         *
+         * @param weight the weight of the descriptor
+         * @param statement the statement of the descriptor
+         */
         private void setCell(int weight, String statement) {
             this.weight.setValue(weight);
             this.statement.setText(statement);
         }
 
+        /**
+         * Performs the cell action bound the the action button.
+         */
         private void action() {
             this.action.getActionListeners()[0].actionPerformed(null);
         }
 
+        /**
+         * Realises this cell with a weight descriptor entry.
+         *
+         * @param entry the weight descriptor entry
+         */
         private void realise(Entry<String, Integer> entry) {
             this.statement.setText(entry.getKey());
             try {
@@ -192,6 +264,12 @@ public class RstWeightsFrame {
 
     }
 
+    /**
+     * Initialises the weight descriptor configuration dialog.
+     *
+     * @param main the controller of the main GUI
+     * @param parent the reference to the parent JFrame (RstMainFrame)
+     */
     public RstWeightsFrame(RstMainFrame main, JFrame parent) {
         this.main = main;
         this.parent = parent;
@@ -225,20 +303,34 @@ public class RstWeightsFrame {
         abort.addActionListener(e -> this.abort());
     }
 
+    /** The size of a cell in the weight descriptor configuration dialog. */
     private static final Dimension CELL_SIZE = new Dimension(388, 24);
+    /** The size of the action button in a cell. */
     private static final Dimension ACTION_SIZE = new Dimension(56, 24);
+    /** String constant of the {@code Remove} action. */
     private static final String REMOVE = "Remove";
+    /** String constant of the {@code Add} action. */
     private static final String ADD = "Add";
 
+    /** Reference to the main window's controller. */
     private RstMainFrame main;
+    /** Reference to the main window's frame. */
     private JFrame parent;
+    /** Reference to the weight configuration dialog. */
     private JDialog frame;
+    /** Panel for holding all weight configuration cells. */
     private JPanel descriptors;
 
+    /**
+     * Closes this configuration dialog and do not update the weight descriptor.
+     */
     public void abort() {
         this.frame.setVisible(false);
     }
 
+    /**
+     * Closes this configuration dialog and update the weight descriptor.
+     */
     public void commit() {
         String descriptor = this.toString();
         this.main.updateWeights(descriptor);
@@ -247,12 +339,23 @@ public class RstWeightsFrame {
         this.frame.setVisible(false);
     }
 
+    /**
+     * Opens this configuration dialog and load in the settings from the main
+     * GUI.
+     *
+     * @param weights the weights descriptor string
+     */
     public void config(String weights) {
         this.load(RstUtils.dissect(weights));
         this.frame.setLocationRelativeTo(this.parent);
         this.frame.setVisible(true);
     }
 
+    /**
+     * Loads in the weight descriptor cells.
+     *
+     * @param list the list of descriptor entries
+     */
     private void load(List<Entry<String, Integer>> list) {
         this.descriptors.removeAll();
         this.descriptors.add(new RstWeightCell(false));
@@ -264,6 +367,12 @@ public class RstWeightsFrame {
         }
     }
 
+    /**
+     * Returns the weight descriptor string of the settings from this
+     * configuration dialog.
+     * @return the weight descriptor string of the settings from this
+     *         configuration dialog
+     */
     @Override
     public String toString() {
         return Arrays.stream(this.descriptors.getComponents())

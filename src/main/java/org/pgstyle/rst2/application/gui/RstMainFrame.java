@@ -36,6 +36,18 @@ import org.pgstyle.rst2.application.common.RstConfig.RstType;
 import org.pgstyle.rst2.application.common.RstResources;
 import org.pgstyle.rst2.application.common.RstUtils;
 
+/**
+ * <p>
+ * Frame controller of graphical interface of the {@code RandomStringTools}.
+ * </p>
+ * <p>
+ * Refactor of the {@code org.pgs.rst.windows.MainWindow} class.
+ * </p>
+ *
+ * @since rst-1
+ * @version rst-2.0
+ * @author PGKan
+ */
 public final class RstMainFrame {
 
     public static final Font MONO;
@@ -59,6 +71,10 @@ public final class RstMainFrame {
         MONOBOLD = font;
     }
 
+    /**
+     * Initialises the main window of the {@code RandomStringTools}
+     * @param config the configuration loaded from the command line
+     */
     public RstMainFrame(RstConfig config) {
         this.rstConfig = config;
         // setup the GUI appearance
@@ -89,38 +105,75 @@ public final class RstMainFrame {
         this.frame.setVisible(true);
     }
 
+    /** Reference to the controller of the weight descriptor configuration dialog. */
     private RstWeightsFrame weightsConfig;
+    /** Stored configurations. */
     private RstConfig rstConfig;
+    /** Closing state of the main window. */
     private boolean closed;
 
+    /** Reference to the main window. */
     private JFrame frame;
+    /** Text area for outputting generated string or program messages. */
     private JTextArea output;
+    /** The generator type selector. */
     private JComboBox<RstType> algorithm;
+    /** The ratio selector of the {@code AlphanumericRandomiser}. */
     private JSpinner ratio;
+    /** The input field of {@code WeightedRandomiser}. */
     private JTextField weights;
+    /** The secure selector of all types of randomiser. */
     private JCheckBox secure;
+    /** The seed input of all types of randomiser. */
     private JTextField seed;
+    /** The generating length input of all types of randomiser. */
     private JSpinner length;
 
+    /**
+     * Returns {@code true} if the main window is closed.
+     *
+     * @return {@code true} if the main window is closed; of {@code false}
+     *         otherwise
+     */
     public boolean isClosed() {
         return this.closed;
     }
 
+    /**
+     * Resets the output text field of the main window and prints string onto it.
+     *
+     * @param string the string to be printed
+     */
     public void rewrite(String string) {
         this.output.setText("");
         this.write(string);
     }
 
+    /**
+     * Prints string onto the output text field of the main window.
+     *
+     * @param string the string to be printed
+     */
     public void write(String string) {
         this.output.append(string);
         this.output.append(System.lineSeparator());
         this.output.setCaretPosition(this.output.getDocument().getLength());
     }
 
+    /**
+     * Updates the weight descriptor with the given string.
+     *
+     * @param weights the new weights descriptor
+     */
     public void updateWeights(String weights) {
         this.weights.setText(weights);
     }
 
+    /**
+     * Creates the subelements for configuring the randomiser.
+     *
+     * @return a {@code JPanel} containing the subelements
+     */
     private JPanel makeConfigPanel() {
         // setup config panel
         FlowLayout defaultLayout = new FlowLayout(FlowLayout.LEADING, 5, 0);
@@ -252,6 +305,11 @@ public final class RstMainFrame {
         return config;
     }
 
+    /**
+     * Creates the subelements for output box.
+     *
+     * @return a {@code JPanel} containing the subelements
+     */
     private JPanel makeOutputPanel() {
         JPanel outputPanel = new JPanel();
         GroupLayout outputLayout = new GroupLayout(outputPanel);
@@ -305,6 +363,11 @@ public final class RstMainFrame {
         return outputPanel;
     }
 
+    /**
+     * Loads the configuration from command line into the main window.
+     *
+     * @param config the configuration container
+     */
     private void loadDefault(RstConfig config) {
         this.algorithm.setSelectedItem(config.type());
         this.secure.setSelected(config.secure());
@@ -326,6 +389,9 @@ public final class RstMainFrame {
         }
     }
 
+    /**
+     * Commits all configurations and engages the randomiser.
+     */
     private void commit() {
         try {
             // load configuration from GUI configurator
@@ -347,6 +413,9 @@ public final class RstMainFrame {
         }
     }
 
+    /**
+     * Copies text from the output text area to the system clipboard.
+     */
     private void copy() {
         this.output.select(0, Integer.MAX_VALUE);
         this.output.requestFocus();
