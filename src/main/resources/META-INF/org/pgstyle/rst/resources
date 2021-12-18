@@ -1,0 +1,53 @@
+##! org/pgstyle/rst/resources /** java/properties;text/plain */
+# This is the resource entries list of the Random String Tools
+
+#---------------------------------------------------------------
+# development version parameter, comment or delete on release
+rst.dev.version = 20211015.18
+rst.dev.build = -(${rst.dev.version}-dev)
+# release version parameter, uncomment on release
+# rst.rel.build = -release
+#---------------------------------------------------------------
+
+#---------------------------------------------------------------
+# rst basic parameter
+#---------------------------------------------------------------
+rst.root = org/pgstyle/rst
+rst.name = pgstyle/rst
+rst.version = 2.0
+rst.build.meta = -nodep
+rst.build = ${rst.dev.build}${rst.build.meta}${rst.rel.build}
+#---------------------------------------------------------------
+
+#---------------------------------------------------------------
+# text resources
+#---------------------------------------------------------------
+rst.text.path = ${rst.root}/texts
+# heading text
+rst.text.head = &extern ${rst.text.path}/head
+# help text
+rst.text.help = &extern ${rst.text.path}/help
+# version text
+rst.text.version = ${rst.name}-${rst.version}${rst.build}
+# interaction menu
+rst.text.interaction = &extern ${rst.text.path}/interaction
+# alogrithm menu
+rst.text.algorithm = &extern ${rst.text.path}/algorithm
+# length menu
+rst.text.length = &extern ${rst.text.path}/length
+# ratio menu
+rst.text.ratio = &extern ${rst.text.path}/ratio
+# seed menu
+rst.text.seed = &extern ${rst.text.path}/seed
+# weight menu
+rst.text.weight = &extern ${rst.text.path}/weight
+#---------------------------------------------------------------
+
+#---------------------------------------------------------------
+# binary resources
+#---------------------------------------------------------------
+rst.font.path = ${rst.root}/fonts
+# fonts: Roboto Mono (Bold)
+# license: ${rst.root}/fonts/LICENSE.txt
+rst.font.mono = &binary ${rst.font.path}/mono.ttf
+rst.font.monobold = &binary ${rst.font.path}/mono-bold.ttf

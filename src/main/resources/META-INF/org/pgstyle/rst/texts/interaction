@@ -1,0 +1,10 @@
+Please type the index of the weight statement you wish to modify;
+or type one of the following commands you wish to perform.
+  (a) algorithm - config the algorithm for the randomiser
+  (l) length    - set output length
+  (e) secure    - toggle secure randomiser
+  (s) seed      - set randomiser seed
+  (r) ratio     - set ratio for alphanumeric randomiser
+  (d) default   - load default randomiser settings
+  (c) commit    - commit the settings
+  (q) quit      - quit this program without engaging the randomiser

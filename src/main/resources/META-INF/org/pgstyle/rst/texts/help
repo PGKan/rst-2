@@ -1,0 +1,25 @@
+Usage: <Java Command> [OPTION]... [--type BASE64]
+       <Java Command> [OPTION]... --type ALPHANUMERIC [Ratio]
+       <Java Command> [OPTION]... --type WEIGHTED [Weight]
+Generate random string. And the aspect of the generated strings are
+controllable using command line arguments or via the GUI.
+
+Arguments:
+    -h, --help         show this help document
+        --version      show program version
+    -i, --interactive  enter interactive mode
+    -l, --length<integer>{256}
+                       output length in bytes
+    -S, --secure       use secure randomiser
+    -s, --seed         seed for randomiser
+    -t, --type<string>{BASE64}
+                       type of randomiser: ALPHANUMERIC, BASE64, WEIGHTED
+        --gui          force start in GUI mode; will override --interactive
+    P:[Ratio<float>]{10.0/36}
+                       the ratio of number to alphabet character of the
+                       alphanumeric randomiser
+    P:[Weight<string>]{1:0..9a..z}
+                       weight descriptor of weighted randomiser; this argument
+                       is read only if the --type is set as "WEIGHTED"
+Source-Repository:
+    https://github.com/PGKan/rst-2
