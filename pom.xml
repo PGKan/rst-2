@@ -4,8 +4,8 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.pgstyle</groupId>
     <artifactId>rst-2</artifactId>
-    <version>2.0-dev</version>
-    <name>Random String Tools Gen2</name>
+    <version>2.0</version>
+    <name>Random String Tools 2</name>
     <description>Second iteration of the old simple random string generator back from 2018. With some new features and packaged API for using this program as a library.</description>
     <url>https://github.com/PGKan/rst-2</url>
 

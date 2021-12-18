@@ -3,10 +3,10 @@
 
 #---------------------------------------------------------------
 # development version parameter, comment or delete on release
-rst.dev.version = 20211015.18
-rst.dev.build = -(${rst.dev.version}-dev)
+# rst.dev.version = 20211015.18
+# rst.dev.build = -(${rst.dev.version}-dev)
 # release version parameter, uncomment on release
-# rst.rel.build = -release
+rst.rel.build = -pre.1
 #---------------------------------------------------------------
 
 #---------------------------------------------------------------
