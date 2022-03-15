@@ -390,13 +390,13 @@ public final class RstMainFrame {
         this.write("loaded settings from RstConfig/CommandLineArguments");
         this.write("algorithm = " + config.type());
         this.write("secure = " + config.secure());
-        this.write("seed = " + config.seed());
+        this.write("seed = " + RstUtils.toQuotedString(config.seed()));
         this.write("length = " + config.length());
         if (config.type().equals(RstType.ALPHANUMERIC)) {
             this.write("ratio = " + config.ratio());
         }
         if (config.type().equals(RstType.WEIGHTED)) {
-            this.write("weights = " + config.raw());
+            this.write("weights = " + RstUtils.toQuotedString(config.raw()));
         }
     }
 

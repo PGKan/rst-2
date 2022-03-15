@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -77,6 +78,19 @@ public final class RstUtils {
         splitted.add(builder.toString());
         return splitted.size() == 1 && splitted.get(0).isEmpty() ?
                new String[0] : splitted.stream().toArray(String[]::new);
+    }
+
+    /**
+     * Converts the given object into its string representation within a pair of
+     * double quote ({@code "}) if the object isn't {@code null}.
+     *
+     * @param object the object
+     * @return the quoted string representation of the object if the object
+     *         isn't {@code null}; or string literal {@code null} if the
+     *         object is {@code null}.
+     */
+    public static String toQuotedString(Object object) {
+        return Optional.ofNullable(object).map(Object::toString).map(s -> "\"" + s + "\"").orElse("null");
     }
 
     /**
