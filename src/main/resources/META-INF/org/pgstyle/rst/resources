@@ -1,4 +1,5 @@
-##! org/pgstyle/rst/resources /** java/properties;text/plain */
+##/** [text/x-java-properties;encoding=utf-8]NotatedResources;Properties */
+##/org/pgstyle/rst/resources
 # This is the resource entries list of the Random String Tools
 
 #---------------------------------------------------------------
@@ -31,7 +32,7 @@ rst.text.help = &extern ${rst.text.path}/help
 rst.text.version = ${rst.name}-${rst.version}${rst.build}
 # interaction menu
 rst.text.interaction = &extern ${rst.text.path}/interaction
-# alogrithm menu
+# algorithm menu
 rst.text.algorithm = &extern ${rst.text.path}/algorithm
 # length menu
 rst.text.length = &extern ${rst.text.path}/length
@@ -47,7 +48,11 @@ rst.text.weight = &extern ${rst.text.path}/weight
 # binary resources
 #---------------------------------------------------------------
 rst.font.path = ${rst.root}/fonts
+rst.icon.path = ${rst.root}/icons
 # fonts: Roboto Mono (Bold)
 # license: ${rst.root}/fonts/LICENSE.txt
 rst.font.mono = &binary ${rst.font.path}/mono.ttf
 rst.font.monobold = &binary ${rst.font.path}/mono-bold.ttf
+# the RST/RST2 icon uses the Roboto Mono font
+rst.icon.rst = &binary ${rst.icon.path}/rst-64.png
+rst.icon.rst2 = &binary ${rst.icon.path}/rst-2-64.png

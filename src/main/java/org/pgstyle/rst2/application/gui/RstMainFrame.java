@@ -6,12 +6,14 @@ import java.awt.Font;
 import java.awt.FontFormatException;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
 
+import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -52,6 +54,7 @@ public final class RstMainFrame {
 
     public static final Font MONO;
     public static final Font MONOBOLD;
+    public static final Image ICON;
 
     static {
         System.setProperty("awt.useSystemAAFontSettings","on");
@@ -69,6 +72,13 @@ public final class RstMainFrame {
             CmdUtils.stderr(RstUtils.stackTraceOf(e));
         }
         MONOBOLD = font;
+        Image icon = null;
+        try {
+            icon = ImageIO.read(RstResources.getStream("rst.icon.rst2"));
+        } catch (IOException | RuntimeException e) {
+            CmdUtils.stderr(RstUtils.stackTraceOf(e));
+        }
+        ICON = icon;
     }
 
     /**
@@ -84,6 +94,7 @@ public final class RstMainFrame {
         this.frame.setLocationRelativeTo(null);
         this.frame.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
         this.frame.getContentPane().setLayout(new BorderLayout());
+        this.frame.setIconImage(RstMainFrame.ICON);
 
         // setup close events
         Thread main = Thread.currentThread();
