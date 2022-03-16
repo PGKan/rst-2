@@ -2,6 +2,8 @@ package org.pgstyle.rst2.application.common;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
@@ -259,6 +261,33 @@ public final class RstUtils {
             bytes = RstUtils.merge(bytes, RstUtils.partition(buffer, 0, length));
         }
         return bytes;
+    }
+
+    /**
+     * Writes string into the print stream with line formatting.
+     *
+     * @param printStream the stream to be written
+     * @param output the string the be written
+     * @return actual count of bytes written
+     */
+    public static long write(PrintStream printStream, String output) {
+        final int step = 64;
+        int iteration = 0;
+        for (int i = 0; i < output.length(); i += step, iteration++) {
+            printStream.println(output.substring(i, Math.min(i + step, output.length())));
+        }
+        return iteration * System.lineSeparator().length() + output.length();
+    }
+
+    /**
+     * Opens a file as a print stream.
+     * 
+     * @param file the file to be open
+     * @return a print stream
+     * @throws IOException if any I/O error occurred
+     */
+    public static PrintStream openFile(File file) throws IOException {
+        return new PrintStream(new FileOutputStream(file), true, "utf-8");
     }
 
     /**

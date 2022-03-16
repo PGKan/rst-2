@@ -36,6 +36,8 @@ rst.text.interaction = &extern ${rst.text.path}/interaction
 rst.text.algorithm = &extern ${rst.text.path}/algorithm
 # length menu
 rst.text.length = &extern ${rst.text.path}/length
+# output menu
+rst.text.output = &extern ${rst.text.path}/output
 # ratio menu
 rst.text.ratio = &extern ${rst.text.path}/ratio
 # seed menu

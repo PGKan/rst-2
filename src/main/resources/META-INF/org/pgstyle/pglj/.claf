@@ -64,6 +64,13 @@
                     "description": "output length in bytes"
                 },
                 {
+                    "name": "Output",
+                    "short": ["o"],
+                    "long": ["output"],
+                    "type": "String",
+                    "description": "output the result into a file instead of standard out"
+                },
+                {
                     "name": "Secure",
                     "short": ["S"],
                     "long": ["secure"],

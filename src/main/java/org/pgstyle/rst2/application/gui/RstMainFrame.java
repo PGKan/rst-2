@@ -12,6 +12,8 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
+import java.io.PrintStream;
+import java.nio.file.Paths;
 
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
@@ -20,6 +22,7 @@ import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -30,6 +33,8 @@ import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.WindowConstants;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.pgstyle.rst2.application.cli.CmdUtils;
 import org.pgstyle.rst2.application.common.RandomStringGenerator;
@@ -332,6 +337,9 @@ public final class RstMainFrame {
         JButton copy = new JButton("Copy");
         copy.setFont(RstMainFrame.MONOBOLD);
         copy.addActionListener(e -> this.copy());
+        JButton save = new JButton("Write");
+        save.setFont(RstMainFrame.MONOBOLD);
+        save.addActionListener(e -> this.save());
         this.output = new JTextArea("");
         JScrollPane outputPane = new JScrollPane(this.output,
                                                  ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
@@ -350,6 +358,8 @@ public final class RstMainFrame {
                                         .addComponent(outputLabel)
                                         .addGap(5)
                                         .addComponent(copy)
+                                        .addGap(5)
+                                        .addComponent(save)
                         )
                         .addGroup(
                             outputLayout.createSequentialGroup()
@@ -364,6 +374,7 @@ public final class RstMainFrame {
                             outputLayout.createParallelGroup(Alignment.BASELINE)
                                         .addComponent(outputLabel)
                                         .addComponent(copy)
+                                        .addComponent(save)
                         )
                         .addGroup(
                             outputLayout.createParallelGroup(Alignment.BASELINE)
@@ -431,6 +442,33 @@ public final class RstMainFrame {
         this.output.select(0, Integer.MAX_VALUE);
         this.output.requestFocus();
         Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(this.output.getText()), null);
+    }
+
+    /**
+     * Saves text from the output text area to a specified file.
+     */
+    private void save() {
+        // select file in current working directory
+        JFileChooser fc = new JFileChooser(".");
+        // rst2 is the default file extension, but other also supported
+        fc.setSelectedFile(Paths.get("output.rst2").toFile());
+        fc.setFileFilter(new FileNameExtensionFilter("RST Output (*.rst2,*.rst)", "rst2", "rst"));
+        fc.addChoosableFileFilter(new FileNameExtensionFilter("Plain Text (*.txt)", "txt"));
+
+        if (fc.showDialog(this.frame, "Save") == JFileChooser.APPROVE_OPTION) {
+            // setup file extension if required but not given
+            FileFilter filter = fc.getFileFilter();
+            String file = filter.accept(fc.getSelectedFile()) ?
+                              fc.getSelectedFile().toString() :
+                              fc.getSelectedFile().toString() + "." + ((FileNameExtensionFilter) filter).getExtensions()[0];
+            try (PrintStream ps = RstUtils.openFile(Paths.get(file).toFile())) {
+                this.rewrite(String.format("Wrote %d bytes to '%s'", RstUtils.write(ps, this.output.getText().trim()), file));
+            }
+            catch (IOException e) {
+                this.rewrite(RstUtils.stackTraceOf(e));
+                this.write("Failed to write file, " + RstUtils.messageOf(e));
+            }
+        }
     }
 
 }

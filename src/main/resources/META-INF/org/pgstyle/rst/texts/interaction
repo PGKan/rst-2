@@ -2,6 +2,7 @@ Please type the index of the weight statement you wish to modify;
 or type one of the following commands you wish to perform.
   (a) algorithm - config the algorithm for the randomiser
   (l) length    - set output length
+  (o) output    - set output file
   (e) secure    - toggle secure randomiser
   (s) seed      - set randomiser seed
   (r) ratio     - set ratio for alphanumeric randomiser
