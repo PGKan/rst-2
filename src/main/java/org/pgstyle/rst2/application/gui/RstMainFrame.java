@@ -393,18 +393,18 @@ public final class RstMainFrame {
     private void loadDefault(RstConfig config) {
         this.algorithm.setSelectedItem(config.type());
         this.secure.setSelected(config.secure());
-        this.ratio.setValue(config.ratio());
+        this.ratio.setValue(Math.max(Math.min(config.ratio(), 1.0), 0.0));
         this.weights.setText(config.raw());
         this.seed.setText(config.seed());
-        this.length.setValue(config.length());
+        this.length.setValue(Math.max(Math.min(config.length(), 65536), 0));
         // print to output text area
         this.write("loaded settings from RstConfig/CommandLineArguments");
         this.write("algorithm = " + config.type());
         this.write("secure = " + config.secure());
         this.write("seed = " + RstUtils.toQuotedString(config.seed()));
-        this.write("length = " + config.length());
+        this.write("length = " + config.length() + (config.length() < 0 || config.length() > 65536 ? " (confined)" : ""));
         if (config.type().equals(RstType.ALPHANUMERIC)) {
-            this.write("ratio = " + config.ratio());
+            this.write("ratio = " + config.ratio() + (config.ratio() < 0 || config.ratio() > 1 ? " (confined)" : ""));
         }
         if (config.type().equals(RstType.WEIGHTED)) {
             this.write("weights = " + RstUtils.toQuotedString(config.raw()));
