@@ -107,7 +107,9 @@ public final class RandomStringTools implements Callable<Integer> {
         try {
             RandomStringGenerator rsg = new RandomStringGenerator(rstConfig);
             try (PrintStream ps = Objects.nonNull(rstConfig.output()) ? RstUtils.openFile(rstConfig.output()) : CmdUtils.stdout()) {
-                RstUtils.write(ps, rsg.generate());
+                do {
+                    RstUtils.write(ps, rsg.step());
+                } while (rsg.available());
             }
         }
         catch (RuntimeException e) {

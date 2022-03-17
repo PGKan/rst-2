@@ -2,6 +2,7 @@ package org.pgstyle.rst2.application.common;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 
 import org.pgstyle.rst2.application.ApplicationException;
@@ -39,6 +40,7 @@ public final class RandomStringGenerator {
     public RandomStringGenerator(RstConfig rstConfig) {
         Objects.requireNonNull(rstConfig, "rstConfig");
         this.rstConfig = rstConfig;
+        this.count = 0;
         try {
             this.randomiser = this.makeRandomiser();
         } catch (RuntimeException e) {
@@ -50,6 +52,8 @@ public final class RandomStringGenerator {
     private Randomiser randomiser;
     /** Configuration container. */
     private RstConfig  rstConfig;
+    /** Generation state */
+    private int count;
 
     /**
      * Generates a random string with the configured randomiser.
@@ -59,6 +63,32 @@ public final class RandomStringGenerator {
      */
     public String generate() {
         return new String(this.randomiser.generate(this.rstConfig.length()), StandardCharsets.UTF_8);
+    }
+
+    /**
+     * Generates random string step by step.
+     *
+     * @return partially generated random string
+     * @throws NoSuchElementException if no more step is available
+     */
+    public String step() {
+        final int step = 192;
+        if (!this.available()) {
+            throw new NoSuchElementException("end has reached");
+        }
+        String generated = new String(this.randomiser.generate(Math.min(this.rstConfig.length() - this.count, step)), StandardCharsets.UTF_8);
+        this.count += step;
+        return generated;
+    }
+
+    /**
+     * Returns {@code true} if the generator can generate more steps.
+     *
+     * @return {@code true} if the generator can generate more steps; or
+     *         {@code false} otherwise
+     */
+    public boolean available() {
+        return this.count <= this.rstConfig.length();
     }
 
     /**

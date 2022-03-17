@@ -281,7 +281,7 @@ public final class RstUtils {
 
     /**
      * Opens a file as a print stream.
-     * 
+     *
      * @param file the file to be open
      * @return a print stream
      * @throws IOException if any I/O error occurred
