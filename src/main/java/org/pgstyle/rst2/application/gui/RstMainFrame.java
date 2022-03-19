@@ -14,6 +14,7 @@ import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Paths;
+import java.util.function.Function;
 
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
@@ -62,21 +63,19 @@ public final class RstMainFrame {
     public static final Image ICON;
 
     static {
+        // enable font anti-aliasing to prevent bad looking font edges
         System.setProperty("awt.useSystemAAFontSettings","on");
         System.setProperty("swing.aatext", "true");
-        Font font = null;
-        try {
-            font = Font.createFont(Font.TRUETYPE_FONT, RstResources.getStream("rst.font.mono")).deriveFont(Font.PLAIN, 13);
-        } catch (FontFormatException | IOException e) {
-            CmdUtils.stderr(RstUtils.stackTraceOf(e));
-        }
-        MONO = font;
-        try {
-            font = Font.createFont(Font.TRUETYPE_FONT, RstResources.getStream("rst.font.monobold")).deriveFont(Font.PLAIN, 13);
-        } catch (FontFormatException | IOException e) {
-            CmdUtils.stderr(RstUtils.stackTraceOf(e));
-        }
-        MONOBOLD = font;
+        Function<String, Font> getFont = key -> {
+            try {
+                return Font.createFont(Font.TRUETYPE_FONT, RstResources.getStream(key)).deriveFont(Font.PLAIN, 13);
+            } catch (FontFormatException | IOException e) {
+                CmdUtils.stderr(RstUtils.stackTraceOf(e));
+                return null;
+            }
+        };
+        MONO = getFont.apply("rst.font.mono");
+        MONOBOLD = getFont.apply("rst.font.monobold");
         Image icon = null;
         try {
             icon = ImageIO.read(RstResources.getStream("rst.icon.rst2"));
