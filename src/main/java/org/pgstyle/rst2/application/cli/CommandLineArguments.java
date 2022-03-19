@@ -11,8 +11,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.pgstyle.rst2.application.common.RstConfig.RstType;
 import org.pgstyle.rst2.application.ApplicationException;
+import org.pgstyle.rst2.application.common.RstConfig.RstType;
 import org.pgstyle.rst2.application.common.RstUtils;
 
 /**
@@ -41,6 +41,8 @@ public final class CommandLineArguments {
         cmdlArgs.put("--gui", "GUI");
         cmdlArgs.put("-l", "Length");
         cmdlArgs.put("--length", "Length");
+        cmdlArgs.put("-o", "Output");
+        cmdlArgs.put("--output", "Output");
         cmdlArgs.put("-w", "Weight");
         cmdlArgs.put("--weight", "Weight");
         cmdlArgs.put("-S", "Secure");
@@ -69,7 +71,7 @@ public final class CommandLineArguments {
      */
     public static CommandLineArguments fromArgs(String[] args){
         try {
-        return new CommandLineArguments(CommandLineArguments.processArguments(args));
+            return new CommandLineArguments(CommandLineArguments.processArguments(args));
         }
         catch (RuntimeException e) {
             throw new ApplicationException("failed to process arguments", e);
@@ -191,6 +193,7 @@ public final class CommandLineArguments {
                 throw new IllegalArgumentException(String.format("invalid type for argument \"%s\"", arg), e);
             }
             break;
+        case "Output":
         case "Seed":
         case "Weight":
             map.put(name, args.next());
@@ -319,6 +322,16 @@ public final class CommandLineArguments {
      */
     public String length() {
         return Optional.ofNullable(this.arguments.get("Length")).orElse("");
+    }
+
+    /**
+     * Returns the {@code Output} argument.
+     *
+     * @return the {@code Output} argument in string; or an empty string if
+     *         the argument has not been set
+     */
+    public String output() {
+        return Optional.ofNullable(this.arguments.get("Output")).orElse("");
     }
 
     /**

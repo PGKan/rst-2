@@ -26,6 +26,24 @@ public final class CmdUtils {
     }
 
     /**
+     * Returns the standard out stream.
+     *
+     * @return the standard out stream
+     */
+    public static PrintStream stdout() {
+        return System.out;
+    }
+
+    /**
+     * Returns the standard error stream.
+     *
+     * @return the standard error stream
+     */
+    public static PrintStream stderr() {
+        return System.err;
+    }
+
+    /**
      * Outputs the data onto the print stream.
      *
      * @param printStream the print stream to be printed on

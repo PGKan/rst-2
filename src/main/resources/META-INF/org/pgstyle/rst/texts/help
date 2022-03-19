@@ -10,6 +10,7 @@ Arguments:
     -i, --interactive  enter interactive mode
     -l, --length<integer>{256}
                        output length in bytes
+    -o, --output       output the result into a file instead of standard out
     -S, --secure       use secure randomiser
     -s, --seed         seed for randomiser
     -t, --type<string>{BASE64}

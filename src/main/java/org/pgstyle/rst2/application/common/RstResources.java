@@ -134,11 +134,11 @@ public final class RstResources {
     }
 
     /**
-     * Resolves external resource text.
+     * Resolves binary resource.
      *
      * @param key the key of the resource entry to be resolved
      * @param value the value of the resource entry to be resolved
-     * @return the resolved resource value
+     * @return resolved binary resource token
      * @throws ApplicationException if failed to load external resource
      */
     private static String binary(String key, String value) {
