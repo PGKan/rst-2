@@ -1,5 +1,6 @@
 package org.pgstyle.rst2.application.common;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -56,6 +57,8 @@ public final class RstConfig {
 
     /** The length of randomiser output. */
     private int     length;
+    /** The output file. */
+    private File    output;
     /** The ratio of numeric digits to alphabet for {@code AlphanumericRandomiser}. */
     private double  ratio;
     /** Uses secured randomiser. */
@@ -151,6 +154,24 @@ public final class RstConfig {
     }
 
     /**
+     * Returns the output file of randomiser output
+     *
+     * @return the output file of randomiser output
+     */
+    public File output() {
+        return this.output;
+    }
+
+    /**
+     * Sets the output file of randomiser output
+     *
+     * @param output the output file of randomiser output
+     */
+    public void output(File output) {
+        this.output = output;
+    }
+
+    /**
      * Appends a weight descriptor to this configuration container.
      *
      * @param weight the weight descriptor to be stored
@@ -243,6 +264,7 @@ public final class RstConfig {
      */
     public void reset() {
         this.length = 256;
+        this.output = null;
         this.ratio = 10.0 / 36;
         this.secure = false;
         this.seed = null;
@@ -371,7 +393,8 @@ public final class RstConfig {
         int log10 = (int) (Math.log10(this.weights.size() + 1.0) + 1);
         string.append("Algorithm: ").append(this.type()).append(System.lineSeparator());
         string.append("Legnth: ").append(this.length()).append(System.lineSeparator());
-        string.append("Seed: ").append(Objects.isNull(this.seed()) ? "<null>" : this.seed()).append(System.lineSeparator());
+        string.append("Output: ").append(RstUtils.toQuotedString(this.output())).append(System.lineSeparator());
+        string.append("Seed: ").append(RstUtils.toQuotedString(this.seed())).append(System.lineSeparator());
         string.append("Secure: ").append(this.secure()).append(System.lineSeparator());
         if (RstType.ALPHANUMERIC.equals(this.type())) {
             string.append("Ratio: ").append(this.ratio()).append(System.lineSeparator());

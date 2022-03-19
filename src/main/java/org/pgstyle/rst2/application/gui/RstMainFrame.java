@@ -6,18 +6,24 @@ import java.awt.Font;
 import java.awt.FontFormatException;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
+import java.io.PrintStream;
+import java.nio.file.Paths;
+import java.util.function.Function;
 
+import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -28,6 +34,8 @@ import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.WindowConstants;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.pgstyle.rst2.application.cli.CmdUtils;
 import org.pgstyle.rst2.application.common.RandomStringGenerator;
@@ -52,23 +60,29 @@ public final class RstMainFrame {
 
     public static final Font MONO;
     public static final Font MONOBOLD;
+    public static final Image ICON;
 
     static {
+        // enable font anti-aliasing to prevent bad looking font edges
         System.setProperty("awt.useSystemAAFontSettings","on");
         System.setProperty("swing.aatext", "true");
-        Font font = null;
+        Function<String, Font> getFont = key -> {
+            try {
+                return Font.createFont(Font.TRUETYPE_FONT, RstResources.getStream(key)).deriveFont(Font.PLAIN, 13);
+            } catch (FontFormatException | IOException e) {
+                CmdUtils.stderr(RstUtils.stackTraceOf(e));
+                return null;
+            }
+        };
+        MONO = getFont.apply("rst.font.mono");
+        MONOBOLD = getFont.apply("rst.font.monobold");
+        Image icon = null;
         try {
-            font = Font.createFont(Font.TRUETYPE_FONT, RstResources.getStream("rst.font.mono")).deriveFont(Font.PLAIN, 13);
-        } catch (FontFormatException | IOException e) {
+            icon = ImageIO.read(RstResources.getStream("rst.icon.rst2"));
+        } catch (IOException | RuntimeException e) {
             CmdUtils.stderr(RstUtils.stackTraceOf(e));
         }
-        MONO = font;
-        try {
-            font = Font.createFont(Font.TRUETYPE_FONT, RstResources.getStream("rst.font.monobold")).deriveFont(Font.PLAIN, 13);
-        } catch (FontFormatException | IOException e) {
-            CmdUtils.stderr(RstUtils.stackTraceOf(e));
-        }
-        MONOBOLD = font;
+        ICON = icon;
     }
 
     /**
@@ -84,6 +98,7 @@ public final class RstMainFrame {
         this.frame.setLocationRelativeTo(null);
         this.frame.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
         this.frame.getContentPane().setLayout(new BorderLayout());
+        this.frame.setIconImage(RstMainFrame.ICON);
 
         // setup close events
         Thread main = Thread.currentThread();
@@ -321,6 +336,9 @@ public final class RstMainFrame {
         JButton copy = new JButton("Copy");
         copy.setFont(RstMainFrame.MONOBOLD);
         copy.addActionListener(e -> this.copy());
+        JButton save = new JButton("Write");
+        save.setFont(RstMainFrame.MONOBOLD);
+        save.addActionListener(e -> this.save());
         this.output = new JTextArea("");
         JScrollPane outputPane = new JScrollPane(this.output,
                                                  ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
@@ -339,6 +357,8 @@ public final class RstMainFrame {
                                         .addComponent(outputLabel)
                                         .addGap(5)
                                         .addComponent(copy)
+                                        .addGap(5)
+                                        .addComponent(save)
                         )
                         .addGroup(
                             outputLayout.createSequentialGroup()
@@ -353,6 +373,7 @@ public final class RstMainFrame {
                             outputLayout.createParallelGroup(Alignment.BASELINE)
                                         .addComponent(outputLabel)
                                         .addComponent(copy)
+                                        .addComponent(save)
                         )
                         .addGroup(
                             outputLayout.createParallelGroup(Alignment.BASELINE)
@@ -371,21 +392,21 @@ public final class RstMainFrame {
     private void loadDefault(RstConfig config) {
         this.algorithm.setSelectedItem(config.type());
         this.secure.setSelected(config.secure());
-        this.ratio.setValue(config.ratio());
+        this.ratio.setValue(Math.max(Math.min(config.ratio(), 1.0), 0.0));
         this.weights.setText(config.raw());
         this.seed.setText(config.seed());
-        this.length.setValue(config.length());
+        this.length.setValue(Math.max(Math.min(config.length(), 65536), 0));
         // print to output text area
         this.write("loaded settings from RstConfig/CommandLineArguments");
         this.write("algorithm = " + config.type());
         this.write("secure = " + config.secure());
-        this.write("seed = " + config.seed());
-        this.write("length = " + config.length());
+        this.write("seed = " + RstUtils.toQuotedString(config.seed()));
+        this.write("length = " + config.length() + (config.length() < 0 || config.length() > 65536 ? " (confined)" : ""));
         if (config.type().equals(RstType.ALPHANUMERIC)) {
-            this.write("ratio = " + config.ratio());
+            this.write("ratio = " + config.ratio() + (config.ratio() < 0 || config.ratio() > 1 ? " (confined)" : ""));
         }
         if (config.type().equals(RstType.WEIGHTED)) {
-            this.write("weights = " + config.raw());
+            this.write("weights = " + RstUtils.toQuotedString(config.raw()));
         }
     }
 
@@ -420,6 +441,33 @@ public final class RstMainFrame {
         this.output.select(0, Integer.MAX_VALUE);
         this.output.requestFocus();
         Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(this.output.getText()), null);
+    }
+
+    /**
+     * Saves text from the output text area to a specified file.
+     */
+    private void save() {
+        // select file in current working directory
+        JFileChooser fc = new JFileChooser(".");
+        // rst2 is the default file extension, but other also supported
+        fc.setSelectedFile(Paths.get("output.rst2").toFile());
+        fc.setFileFilter(new FileNameExtensionFilter("RST Output (*.rst2,*.rst)", "rst2", "rst"));
+        fc.addChoosableFileFilter(new FileNameExtensionFilter("Plain Text (*.txt)", "txt"));
+
+        if (fc.showDialog(this.frame, "Save") == JFileChooser.APPROVE_OPTION) {
+            // setup file extension if required but not given
+            FileFilter filter = fc.getFileFilter();
+            String file = filter.accept(fc.getSelectedFile()) ?
+                              fc.getSelectedFile().toString() :
+                              fc.getSelectedFile().toString() + "." + ((FileNameExtensionFilter) filter).getExtensions()[0];
+            try (PrintStream ps = RstUtils.openFile(Paths.get(file).toFile())) {
+                this.rewrite(String.format("Wrote %d bytes to '%s'", RstUtils.write(ps, this.output.getText().trim()), file));
+            }
+            catch (IOException e) {
+                this.rewrite(RstUtils.stackTraceOf(e));
+                this.write("Failed to write file, " + RstUtils.messageOf(e));
+            }
+        }
     }
 
 }

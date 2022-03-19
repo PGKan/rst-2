@@ -1,5 +1,8 @@
 package org.pgstyle.rst2.application;
 
+import java.io.IOException;
+import java.io.PrintStream;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 
 import org.pgstyle.rst2.application.cli.CmdUtils;
@@ -29,6 +32,8 @@ public final class RandomStringTools implements Callable<Integer> {
     public static final int FAIL_ARG  = 1;
     /** Exiting state: 2 Initialisation Failure */
     public static final int FAIL_INIT = 2;
+    /** Exiting state: 3 Write Failure */
+    public static final int FAIL_WRITE = 3;
     /** Exiting state: 4 Interrupted */
     public static final int FAIL_INTR = 4;
 
@@ -101,11 +106,18 @@ public final class RandomStringTools implements Callable<Integer> {
         }
         try {
             RandomStringGenerator rsg = new RandomStringGenerator(rstConfig);
-            CmdUtils.stdout("%s%n", rsg.generate());
+            try (PrintStream ps = Objects.nonNull(rstConfig.output()) ? RstUtils.openFile(rstConfig.output()) : CmdUtils.stdout()) {
+                do {
+                    RstUtils.write(ps, rsg.step());
+                } while (rsg.available());
+            }
         }
         catch (RuntimeException e) {
             CmdUtils.stderr("failed to engage randomiser%n%s", RstUtils.stackTraceOf(e));
             return RandomStringTools.FAIL_INIT;
+        } catch (IOException e) {
+            CmdUtils.stderr("failed write result%n%s", RstUtils.stackTraceOf(e));
+            return RandomStringTools.FAIL_WRITE;
         }
         return RandomStringTools.SUCCESS;
     }

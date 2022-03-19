@@ -35,3 +35,7 @@ hs_err_pid*
 .factorypath
 .project
 /.apt_generated/
+
+# output file of RST
+*.rst
+*.rst2

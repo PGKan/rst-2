@@ -1,7 +1,10 @@
 package org.pgstyle.rst2.application.cli;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.IntStream;
 
 import org.pgstyle.rst2.application.ApplicationException;
@@ -60,6 +63,7 @@ public final class RstConfigurator {
             }
         }
         this.rstConfig.length(Integer.parseInt(cmdlArgs.length()));
+        this.rstConfig.output(Optional.ofNullable(cmdlArgs.output()).filter(s -> !s.isEmpty()).map(Paths::get).map(Path::toFile).orElse(null));
         this.rstConfig.secure(cmdlArgs.secure());
         this.rstConfig.seed(cmdlArgs.seed());
 
@@ -120,6 +124,9 @@ public final class RstConfigurator {
         case "length":
         case "l":
             return "i:length/" + this.length();
+        case "output":
+        case "o":
+            return "i:output/" + this.output();
         case "d":
         case "default":
             return "i:default/" + this.reset();
@@ -196,6 +203,33 @@ public final class RstConfigurator {
             }
             catch (RuntimeException e) {
                 CmdUtils.stderr("%s%nwrong length, try again%n", RstUtils.messageOf(e));
+            }
+        }
+    }
+
+    /**
+     * Controller handles interactive output file selector.
+     *
+     * @return the action summary of the controller
+     */
+    private String output() {
+        while (true) {
+            CmdUtils.stdout("Current output: %s%n", RstUtils.toQuotedString(this.rstConfig.output()));
+            CmdUtils.stdout(RstResources.get("rst.text.output"));
+            CmdUtils.stdout(": ");
+            String result = CmdUtils.stdin();
+            try {
+                if (result.isEmpty()) {
+                    this.rstConfig.output(null);
+                    return "";
+                }
+                else {
+                    this.rstConfig.output(Paths.get(result).toFile());
+                    return String.valueOf(this.rstConfig.output());
+                }
+            }
+            catch (RuntimeException e) {
+                CmdUtils.stderr("%s%nwrong file, try again%n", RstUtils.messageOf(e));
             }
         }
     }
